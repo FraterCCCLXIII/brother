@@ -1,0 +1,21 @@
+name = "brother-api"
+main = "src/index.ts"
+compatibility_date = "2025-01-17"
+
+routes = []         # add a custom domain later, for now use *.workers.dev
+
+# Bindings
+[[d1_databases]]
+binding = "DB"       # env.DB in code
+database_name = "brother-db"
+database_id = "<D1_DATABASE_ID>"
+
+[[r2_buckets]]
+binding = "IMAGES"   # env.IMAGES in code
+bucket_name = "brother-images"
+
+[vars]
+CORS_ORIGIN = "*"    # tighten later to your app scheme and dev host
+
+[observability]
+enabled = true

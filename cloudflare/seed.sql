@@ -1,0 +1,7 @@
+-- Seed profiles for development
+INSERT INTO profiles(id, display_name, bio, city, photo, intents, interests) VALUES
+('u1', 'Evan', 'Looking for workout buddies and hiking partners. Love the outdoors and staying active!', 'San Diego', 'https://picsum.photos/seed/evan/900/1200', '["gym", "hiking", "outdoor activities"]', '["fitness", "nature", "adventure", "health"]'),
+('u2', 'Max', 'Coffee enthusiast and startup founder. Always down for deep conversations and networking.', 'La Jolla', 'https://picsum.photos/seed/max/900/1200', '["study", "coffee", "networking"]', '["startups", "books", "entrepreneurship", "technology"]'),
+('u3', 'Alex', 'Board game night organizer and trivia master. Looking for fellow nerds to hang with!', 'Pacific Beach', 'https://picsum.photos/seed/alex/900/1200', '["board games", "trivia", "social events"]', '["games", "puzzles", "socializing", "strategy"]'),
+('u4', 'Jordan', 'Surf instructor and beach lover. Want to find people who appreciate the ocean lifestyle.', 'Ocean Beach', 'https://picsum.photos/seed/jordan/900/1200', '["surfing", "beach activities", "water sports"]', '["ocean", "surfing", "beach", "lifestyle"]'),
+('u5', 'Sam', 'Tech geek and podcast host. Love discussing AI, startups, and the future of technology.', 'Downtown', 'https://picsum.photos/seed/sam/900/1200', '["tech discussion", "podcasts", "innovation"]', '["artificial intelligence", "technology", "innovation", "podcasting"]');

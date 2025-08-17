@@ -1,0 +1,21 @@
+{
+  "name": "brother-api",
+  "version": "1.0.0",
+  "description": "Cloudflare Workers API for Brother app",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev --persist",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create brother-db",
+    "db:migrate": "wrangler d1 migrations apply brother-db",
+    "db:seed": "wrangler d1 execute brother-db --file=./seed.sql"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241218.0",
+    "typescript": "^5.0.0",
+    "wrangler": "^3.0.0"
+  },
+  "keywords": ["cloudflare", "workers", "d1", "api", "brother"],
+  "author": "Your Name",
+  "license": "MIT"
+}
