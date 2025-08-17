@@ -1,0 +1,30 @@
+Starting project at /Users/paulbloch/Documents/github/brother/brother
+Starting Metro Bundler
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+iOS ./index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 666ms index.ts (1582 modules)
+ ERROR  Error: The package 'react-native-keyboard-controller' doesn't seem to be linked. Make sure: 
+
+- You have run 'pod install'
+- You rebuilt the app after installing the package
+- You are not using Expo Go
+, js engine: hermes
+ WARN  Route "./chat/[matchId].tsx" is missing the required default export. Ensure a React component is exported as default.
+ WARN  Linking requires a build-time setting `scheme` in the project's Expo config (app.config.js or app.json) for production apps, if it's left blank, your app may crash. The scheme does not apply to development in the Expo client but you should add it as soon as you start working with Linking to avoid creating a broken build. Learn more: https://docs.expo.dev/guides/linking/
+ WARN  [Layout children]: No route named "chat/[matchId]" exists in nested children: ["index", "_sitemap", "+not-found", "(tabs)", "auth/create-profile", "auth/login", "report/[userId]"]
+ ERROR  The action 'GO_BACK' was not handled by any navigator.
+
+Is there any screen to go back to?
+
+This is a development-only warning and won't be shown in production.
+ ERROR  The action 'GO_BACK' was not handled by any navigator.
+
+Is there any screen to go back to?
+
+This is a development-only warning and won't be shown in production.
+ ERROR  The action 'GO_BACK' was not handled by any navigator.
+
+Is there any screen to go back to?
+
+This is a development-only warning and won't be shown in production.
