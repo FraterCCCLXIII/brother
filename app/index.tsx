@@ -1,45 +1,78 @@
-import { useEffect } from 'react';
+import React from 'react';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-export default function Index() {
+export default function SplashScreen() {
   const router = useRouter();
 
-  useEffect(() => {
-    // For MVP, we'll start with the auth flow
-    // In a real app, this would check for existing authentication
-    const timer = setTimeout(() => {
-      router.replace('/auth/login');
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [router]);
+  const handleGetStarted = () => {
+    router.push('/auth/login');
+  };
 
   return (
-    <View style={{ 
-      flex: 1, 
-      backgroundColor: '#FFFFFF', 
-      alignItems: 'center', 
-      justifyContent: 'center' 
+    <View style={{
+      flex: 1,
+      backgroundColor: '#FFFFFF',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 24,
     }}>
-      <View style={{ alignItems: 'center' }}>
-        <Text style={{ 
-          color: '#000000', 
-          fontSize: 36, 
-          fontWeight: 'bold', 
-          marginBottom: 16 
-        }}>
-          Brother
-        </Text>
-        <Text style={{ 
-          color: '#6C757D', 
-          fontSize: 18, 
-          marginBottom: 32 
-        }}>
-          Making male friendships
-        </Text>
-        <ActivityIndicator size="large" color="#000000" />
+      {/* App Logo/Icon */}
+      <View style={{
+        width: 120,
+        height: 120,
+        backgroundColor: '#000000',
+        borderRadius: 60,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 48,
+      }}>
+        <Ionicons name="people" size={60} color="white" />
       </View>
+
+      {/* App Name */}
+      <Text style={{
+        color: '#000000',
+        fontSize: 48,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginBottom: 16,
+      }}>
+        Brother
+      </Text>
+
+      {/* Tagline */}
+      <Text style={{
+        color: '#6C757D',
+        fontSize: 20,
+        textAlign: 'center',
+        marginBottom: 64,
+        lineHeight: 28,
+      }}>
+        Build meaningful male friendships
+      </Text>
+
+      {/* Get Started Button */}
+      <TouchableOpacity
+        onPress={handleGetStarted}
+        style={{
+          backgroundColor: '#000000',
+          paddingVertical: 20,
+          paddingHorizontal: 48,
+          borderRadius: 16,
+          alignItems: 'center',
+          minWidth: 200,
+        }}
+      >
+        <Text style={{
+          color: '#FFFFFF',
+          fontSize: 20,
+          fontWeight: '600',
+        }}>
+          Get Started
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }

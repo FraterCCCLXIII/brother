@@ -70,6 +70,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile, onPress, onPa
               fontSize: 24,
               fontWeight: 'bold',
               marginRight: 12,
+              textAlign: 'left',
             }}>
               {profile.name}, {profile.age}
             </Text>
@@ -85,6 +86,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile, onPress, onPa
             color: '#6C757D',
             fontSize: 16,
             marginBottom: 16,
+            textAlign: 'left',
           }}>
             {profile.city} • {profile.distance}km away
           </Text>
@@ -94,6 +96,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile, onPress, onPa
             fontSize: 16,
             lineHeight: 22,
             marginBottom: 16,
+            textAlign: 'left',
           }}>
             {profile.bio}
           </Text>
@@ -112,6 +115,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile, onPress, onPa
                   color: '#FFFFFF',
                   fontSize: 12,
                   fontWeight: '600',
+                  textAlign: 'left',
                 }}>
                   {intent}
                 </Text>
@@ -196,6 +200,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile, onPress, onPa
                   fontSize: 28,
                   fontWeight: 'bold',
                   marginRight: 16,
+                  textAlign: 'left',
                 }}>
                   {profile.name}, {profile.age}
                 </Text>
@@ -211,6 +216,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile, onPress, onPa
                 color: '#6C757D',
                 fontSize: 18,
                 marginBottom: 24,
+                textAlign: 'left',
               }}>
                 {profile.city} • {profile.distance}km away
               </Text>
@@ -220,6 +226,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile, onPress, onPa
                 fontSize: 18,
                 lineHeight: 26,
                 marginBottom: 24,
+                textAlign: 'left',
               }}>
                 {profile.bio}
               </Text>
@@ -231,6 +238,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile, onPress, onPa
                   fontSize: 20,
                   fontWeight: 'bold',
                   marginBottom: 16,
+                  textAlign: 'left',
                 }}>
                   Looking for
                 </Text>
@@ -263,6 +271,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile, onPress, onPa
                   fontSize: 20,
                   fontWeight: 'bold',
                   marginBottom: 16,
+                  textAlign: 'left',
                 }}>
                   Interests
                 </Text>

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { TopBar } from '../../components/TopBar';
 import { FormField } from '../../components/FormField';
 import { Chip } from '../../components/Chip';
 import { Ionicons } from '@expo/vector-icons';
+
+const { width, height } = Dimensions.get('window');
 
 const availableIntents = [
   'Workout Buddy', 'Coffee Friend', 'Hiking Partner', 'Board Game Night',
@@ -24,12 +26,14 @@ const availableInterests = [
   'Comics', 'Business', 'Self-Development'
 ];
 
-type ProfileStep = 'basic' | 'bio' | 'intents' | 'interests' | 'review';
+type ProfileStep = 'name' | 'birthdate' | 'location' | 'photos' | 'bio' | 'intents' | 'interests';
 
 export default function CreateProfileScreen() {
-  const [currentStep, setCurrentStep] = useState<ProfileStep>('basic');
+  const [currentStep, setCurrentStep] = useState<ProfileStep>('name');
   const [name, setName] = useState('');
-  const [age, setAge] = useState('');
+  const [birthMonth, setBirthMonth] = useState('');
+  const [birthDay, setBirthDay] = useState('');
+  const [birthYear, setBirthYear] = useState('');
   const [city, setCity] = useState('');
   const [bio, setBio] = useState('');
   const [selectedIntents, setSelectedIntents] = useState<string[]>([]);
@@ -54,15 +58,30 @@ export default function CreateProfileScreen() {
   };
 
   const nextStep = () => {
-    if (currentStep === 'basic') {
-      if (!name.trim() || !age.trim() || !city.trim()) {
-        Alert.alert('Error', 'Please fill in all fields');
+    if (currentStep === 'name') {
+      if (!name.trim()) {
+        Alert.alert('Error', 'Please enter your name');
         return;
       }
-      if (parseInt(age) < 18) {
+      setCurrentStep('birthdate');
+    } else if (currentStep === 'birthdate') {
+      if (!birthMonth || !birthDay || !birthYear) {
+        Alert.alert('Error', 'Please fill in all birthdate fields');
+        return;
+      }
+      const age = new Date().getFullYear() - parseInt(birthYear);
+      if (age < 18) {
         Alert.alert('Error', 'You must be at least 18 years old');
         return;
       }
+      setCurrentStep('location');
+    } else if (currentStep === 'location') {
+      if (!city.trim()) {
+        Alert.alert('Error', 'Please set your location');
+        return;
+      }
+      setCurrentStep('photos');
+    } else if (currentStep === 'photos') {
       setCurrentStep('bio');
     } else if (currentStep === 'bio') {
       if (!bio.trim()) {
@@ -81,15 +100,8 @@ export default function CreateProfileScreen() {
         Alert.alert('Error', 'Please select at least one interest');
         return;
       }
-      setCurrentStep('review');
+      handleSubmit();
     }
-  };
-
-  const prevStep = () => {
-    if (currentStep === 'bio') setCurrentStep('basic');
-    else if (currentStep === 'intents') setCurrentStep('bio');
-    else if (currentStep === 'interests') setCurrentStep('intents');
-    else if (currentStep === 'review') setCurrentStep('interests');
   };
 
   const handleSubmit = async () => {
@@ -111,54 +123,45 @@ export default function CreateProfileScreen() {
     }, 1000);
   };
 
-  const renderStepIndicator = () => {
-    const steps = ['basic', 'bio', 'intents', 'interests', 'review'];
+  const renderProgressBar = () => {
+    const steps = ['name', 'birthdate', 'location', 'photos', 'bio', 'intents', 'interests'];
     const currentIndex = steps.indexOf(currentStep);
+    const progress = (currentIndex + 1) / steps.length;
     
     return (
       <View style={{
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
         paddingHorizontal: 24,
         paddingVertical: 16,
       }}>
-        {steps.map((step, index) => (
-          <View key={step} style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <View style={{
-              width: 32,
-              height: 32,
-              borderRadius: 16,
-              backgroundColor: index <= currentIndex ? '#000000' : '#E9ECEF',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginHorizontal: 4,
-            }}>
-              <Text style={{
-                color: index <= currentIndex ? '#FFFFFF' : '#6C757D',
-                fontSize: 14,
-                fontWeight: '600',
-              }}>
-                {index + 1}
-              </Text>
-            </View>
-            {index < steps.length - 1 && (
-              <View style={{
-                width: 20,
-                height: 2,
-                backgroundColor: index < currentIndex ? '#000000' : '#E9ECEF',
-                marginHorizontal: 4,
-              }} />
-            )}
-          </View>
-        ))}
+        <View style={{
+          width: '100%',
+          height: 4,
+          backgroundColor: '#E9ECEF',
+          borderRadius: 2,
+          overflow: 'hidden',
+        }}>
+          <View style={{
+            width: `${progress * 100}%`,
+            height: '100%',
+            backgroundColor: '#000000',
+            borderRadius: 2,
+          }} />
+        </View>
+        <Text style={{
+          color: '#6C757D',
+          fontSize: 14,
+          textAlign: 'center',
+          marginTop: 8,
+        }}>
+          Step {currentIndex + 1} of {steps.length}
+        </Text>
       </View>
     );
   };
 
-  const renderBasicInfo = () => (
+  const renderName = () => (
     <View style={{ flex: 1, paddingHorizontal: 24 }}>
-      <View style={{ alignItems: 'center', marginBottom: 32 }}>
+      <View style={{ alignItems: 'center', marginBottom: 48 }}>
         <View style={{
           width: 80,
           height: 80,
@@ -166,47 +169,186 @@ export default function CreateProfileScreen() {
           borderRadius: 40,
           alignItems: 'center',
           justifyContent: 'center',
-          marginBottom: 16,
+          marginBottom: 24,
         }}>
           <Ionicons name="person" size={40} color="white" />
         </View>
         <Text style={{
           color: '#000000',
-          fontSize: 24,
+          fontSize: 28,
           fontWeight: 'bold',
           textAlign: 'center',
-          marginBottom: 8,
+          marginBottom: 12,
         }}>
-          Basic Information
+          What's your name?
         </Text>
         <Text style={{
           color: '#6C757D',
           fontSize: 16,
           textAlign: 'center',
+          lineHeight: 24,
         }}>
-          Let's start with the basics
+          This is how other users will see you
         </Text>
       </View>
 
       <FormField
-        label="Full Name"
-        placeholder="Enter your full name"
+        label="Name"
+        placeholder="Enter your name"
         value={name}
         onChangeText={setName}
         autoCapitalize="words"
         required
       />
+
+      <View style={{ flex: 1 }} />
       
-      <FormField
-        label="Age"
-        placeholder="Enter your age"
-        value={age}
-        onChangeText={setAge}
-        keyboardType="numeric"
-        maxLength={2}
-        required
-      />
+      <TouchableOpacity
+        onPress={nextStep}
+        style={{
+          backgroundColor: '#000000',
+          paddingVertical: 16,
+          borderRadius: 16,
+          alignItems: 'center',
+          marginBottom: 32,
+        }}
+      >
+        <Text style={{
+          color: '#FFFFFF',
+          fontSize: 18,
+          fontWeight: '600',
+        }}>
+          Continue
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderBirthdate = () => (
+    <View style={{ flex: 1, paddingHorizontal: 24 }}>
+      <View style={{ alignItems: 'center', marginBottom: 48 }}>
+        <View style={{
+          width: 80,
+          height: 80,
+          backgroundColor: '#000000',
+          borderRadius: 40,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 24,
+        }}>
+          <Ionicons name="calendar" size={40} color="white" />
+        </View>
+        <Text style={{
+          color: '#000000',
+          fontSize: 28,
+          fontWeight: 'bold',
+          textAlign: 'center',
+          marginBottom: 12,
+        }}>
+          When's your birthday?
+        </Text>
+        <Text style={{
+          color: '#6C757D',
+          fontSize: 16,
+          textAlign: 'center',
+          lineHeight: 24,
+        }}>
+          Only your age will be displayed to other users
+        </Text>
+      </View>
+
+      <View style={{ flexDirection: 'row', gap: 12 }}>
+        <View style={{ flex: 1 }}>
+          <FormField
+            label="Month"
+            placeholder="MM"
+            value={birthMonth}
+            onChangeText={setBirthMonth}
+            keyboardType="numeric"
+            maxLength={2}
+            required
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <FormField
+            label="Day"
+            placeholder="DD"
+            value={birthDay}
+            onChangeText={setBirthDay}
+            keyboardType="numeric"
+            maxLength={2}
+            required
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <FormField
+            label="Year"
+            placeholder="YYYY"
+            value={birthYear}
+            onChangeText={setBirthYear}
+            keyboardType="numeric"
+            maxLength={4}
+            required
+          />
+        </View>
+      </View>
+
+      <View style={{ flex: 1 }} />
       
+      <TouchableOpacity
+        onPress={nextStep}
+        style={{
+          backgroundColor: '#000000',
+          paddingVertical: 16,
+          borderRadius: 16,
+          alignItems: 'center',
+          marginBottom: 32,
+        }}
+      >
+        <Text style={{
+          color: '#FFFFFF',
+          fontSize: 18,
+          fontWeight: '600',
+        }}>
+          Continue
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderLocation = () => (
+    <View style={{ flex: 1, paddingHorizontal: 24 }}>
+      <View style={{ alignItems: 'center', marginBottom: 48 }}>
+        <View style={{
+          width: 80,
+          height: 80,
+          backgroundColor: '#000000',
+          borderRadius: 40,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 24,
+        }}>
+          <Ionicons name="location" size={40} color="white" />
+        </View>
+        <Text style={{
+          color: '#000000',
+          fontSize: 28,
+          fontWeight: 'bold',
+          textAlign: 'center',
+          marginBottom: 12,
+        }}>
+          Set your location
+        </Text>
+        <Text style={{
+          color: '#6C757D',
+          fontSize: 16,
+          textAlign: 'center',
+          lineHeight: 24,
+        }}>
+          Help others find you nearby
+        </Text>
+      </View>
+
       <FormField
         label="City"
         placeholder="Enter your city"
@@ -216,6 +358,8 @@ export default function CreateProfileScreen() {
         required
       />
 
+      <View style={{ flex: 1 }} />
+      
       <TouchableOpacity
         onPress={nextStep}
         style={{
@@ -223,7 +367,84 @@ export default function CreateProfileScreen() {
           paddingVertical: 16,
           borderRadius: 16,
           alignItems: 'center',
-          marginTop: 32,
+          marginBottom: 32,
+        }}
+      >
+        <Text style={{
+          color: '#FFFFFF',
+          fontSize: 18,
+          fontWeight: '600',
+        }}>
+          Continue
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderPhotos = () => (
+    <View style={{ flex: 1, paddingHorizontal: 24 }}>
+      <View style={{ alignItems: 'center', marginBottom: 48 }}>
+        <View style={{
+          width: 80,
+          height: 80,
+          backgroundColor: '#000000',
+          borderRadius: 40,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 24,
+        }}>
+          <Ionicons name="camera" size={40} color="white" />
+        </View>
+        <Text style={{
+          color: '#000000',
+          fontSize: 28,
+          fontWeight: 'bold',
+          textAlign: 'center',
+          marginBottom: 12,
+        }}>
+          Add photos
+        </Text>
+        <Text style={{
+          color: '#6C757D',
+          fontSize: 16,
+          textAlign: 'center',
+          lineHeight: 24,
+        }}>
+          Show others who you are
+        </Text>
+      </View>
+
+      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 32 }}>
+        {[1, 2, 3, 4].map((index) => (
+          <TouchableOpacity
+            key={index}
+            style={{
+              width: (width - 72) / 4,
+              height: (width - 72) / 4,
+              backgroundColor: '#F8F9FA',
+              borderRadius: 16,
+              borderWidth: 2,
+              borderColor: '#E9ECEF',
+              borderStyle: 'dashed',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Ionicons name="add" size={32} color="#6C757D" />
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <View style={{ flex: 1 }} />
+      
+      <TouchableOpacity
+        onPress={nextStep}
+        style={{
+          backgroundColor: '#000000',
+          paddingVertical: 16,
+          borderRadius: 16,
+          alignItems: 'center',
+          marginBottom: 32,
         }}
       >
         <Text style={{
@@ -239,7 +460,7 @@ export default function CreateProfileScreen() {
 
   const renderBio = () => (
     <View style={{ flex: 1, paddingHorizontal: 24 }}>
-      <View style={{ alignItems: 'center', marginBottom: 32 }}>
+      <View style={{ alignItems: 'center', marginBottom: 48 }}>
         <View style={{
           width: 80,
           height: 80,
@@ -247,23 +468,24 @@ export default function CreateProfileScreen() {
           borderRadius: 40,
           alignItems: 'center',
           justifyContent: 'center',
-          marginBottom: 16,
+          marginBottom: 24,
         }}>
           <Ionicons name="chatbubble" size={40} color="white" />
         </View>
         <Text style={{
           color: '#000000',
-          fontSize: 24,
+          fontSize: 28,
           fontWeight: 'bold',
           textAlign: 'center',
-          marginBottom: 8,
+          marginBottom: 12,
         }}>
-          Tell Us About Yourself
+          Tell us about yourself
         </Text>
         <Text style={{
           color: '#6C757D',
           fontSize: 16,
           textAlign: 'center',
+          lineHeight: 24,
         }}>
           Help others get to know you better
         </Text>
@@ -280,55 +502,32 @@ export default function CreateProfileScreen() {
         required
       />
 
-      <View style={{ flexDirection: 'row', marginTop: 32 }}>
-        <TouchableOpacity
-          onPress={prevStep}
-          style={{
-            flex: 1,
-            backgroundColor: '#F8F9FA',
-            paddingVertical: 16,
-            borderRadius: 16,
-            alignItems: 'center',
-            marginRight: 12,
-            borderWidth: 1,
-            borderColor: '#E9ECEF',
-          }}
-        >
-          <Text style={{
-            color: '#000000',
-            fontSize: 18,
-            fontWeight: '600',
-          }}>
-            Back
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          onPress={nextStep}
-          style={{
-            flex: 1,
-            backgroundColor: '#000000',
-            paddingVertical: 16,
-            borderRadius: 16,
-            alignItems: 'center',
-            marginLeft: 12,
-          }}
-        >
-          <Text style={{
-            color: '#FFFFFF',
-            fontSize: 18,
-            fontWeight: '600',
-          }}>
-            Continue
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <View style={{ flex: 1 }} />
+      
+      <TouchableOpacity
+        onPress={nextStep}
+        style={{
+          backgroundColor: '#000000',
+          paddingVertical: 16,
+          borderRadius: 16,
+          alignItems: 'center',
+          marginBottom: 32,
+        }}
+      >
+        <Text style={{
+          color: '#FFFFFF',
+          fontSize: 18,
+          fontWeight: '600',
+        }}>
+          Continue
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 
   const renderIntents = () => (
     <View style={{ flex: 1, paddingHorizontal: 24 }}>
-      <View style={{ alignItems: 'center', marginBottom: 32 }}>
+      <View style={{ alignItems: 'center', marginBottom: 48 }}>
         <View style={{
           width: 80,
           height: 80,
@@ -336,29 +535,30 @@ export default function CreateProfileScreen() {
           borderRadius: 40,
           alignItems: 'center',
           justifyContent: 'center',
-          marginBottom: 16,
+          marginBottom: 24,
         }}>
-          <Ionicons name="heart" size={40} color="white" />
+          <Ionicons name="search" size={40} color="white" />
         </View>
         <Text style={{
           color: '#000000',
-          fontSize: 24,
+          fontSize: 28,
           fontWeight: 'bold',
           textAlign: 'center',
-          marginBottom: 8,
+          marginBottom: 12,
         }}>
-          What Are You Looking For?
+          What are you looking for?
         </Text>
         <Text style={{
           color: '#6C757D',
           fontSize: 16,
           textAlign: 'center',
+          lineHeight: 24,
         }}>
           Select up to 5 intents
         </Text>
       </View>
 
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 32 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 32 }}>
         {availableIntents.map((intent) => (
           <Chip
             key={intent}
@@ -370,55 +570,32 @@ export default function CreateProfileScreen() {
         ))}
       </View>
 
-      <View style={{ flexDirection: 'row', marginTop: 'auto' }}>
-        <TouchableOpacity
-          onPress={prevStep}
-          style={{
-            flex: 1,
-            backgroundColor: '#F8F9FA',
-            paddingVertical: 16,
-            borderRadius: 16,
-            alignItems: 'center',
-            marginRight: 12,
-            borderWidth: 1,
-            borderColor: '#E9ECEF',
-          }}
-        >
-          <Text style={{
-            color: '#000000',
-            fontSize: 18,
-            fontWeight: '600',
-          }}>
-            Back
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          onPress={nextStep}
-          style={{
-            flex: 1,
-            backgroundColor: '#000000',
-            paddingVertical: 16,
-            borderRadius: 16,
-            alignItems: 'center',
-            marginLeft: 12,
-          }}
-        >
-          <Text style={{
-            color: '#FFFFFF',
-            fontSize: 18,
-            fontWeight: '600',
-          }}>
-            Continue
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <View style={{ flex: 1 }} />
+      
+      <TouchableOpacity
+        onPress={nextStep}
+        style={{
+          backgroundColor: '#000000',
+          paddingVertical: 16,
+          borderRadius: 16,
+          alignItems: 'center',
+          marginBottom: 32,
+        }}
+      >
+        <Text style={{
+          color: '#FFFFFF',
+          fontSize: 18,
+          fontWeight: '600',
+        }}>
+          Continue
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 
   const renderInterests = () => (
     <View style={{ flex: 1, paddingHorizontal: 24 }}>
-      <View style={{ alignItems: 'center', marginBottom: 32 }}>
+      <View style={{ alignItems: 'center', marginBottom: 48 }}>
         <View style={{
           width: 80,
           height: 80,
@@ -426,29 +603,30 @@ export default function CreateProfileScreen() {
           borderRadius: 40,
           alignItems: 'center',
           justifyContent: 'center',
-          marginBottom: 16,
+          marginBottom: 24,
         }}>
           <Ionicons name="star" size={40} color="white" />
         </View>
         <Text style={{
           color: '#000000',
-          fontSize: 24,
+          fontSize: 28,
           fontWeight: 'bold',
           textAlign: 'center',
-          marginBottom: 8,
+          marginBottom: 12,
         }}>
-          What Are Your Interests?
+          What are your interests?
         </Text>
         <Text style={{
           color: '#6C757D',
           fontSize: 16,
           textAlign: 'center',
+          lineHeight: 24,
         }}>
           Select up to 8 interests
         </Text>
       </View>
 
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 32 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 32 }}>
         {availableInterests.map((interest) => (
           <Chip
             key={interest}
@@ -460,233 +638,59 @@ export default function CreateProfileScreen() {
         ))}
       </View>
 
-      <View style={{ flexDirection: 'row', marginTop: 'auto' }}>
-        <TouchableOpacity
-          onPress={prevStep}
-          style={{
-            flex: 1,
-            backgroundColor: '#F8F9FA',
-            paddingVertical: 16,
-            borderRadius: 16,
-            alignItems: 'center',
-            marginRight: 12,
-            borderWidth: 1,
-            borderColor: '#E9ECEF',
-          }}
-        >
-          <Text style={{
-            color: '#000000',
-            fontSize: 18,
-            fontWeight: '600',
-          }}>
-            Back
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          onPress={nextStep}
-          style={{
-            flex: 1,
-            backgroundColor: '#000000',
-            paddingVertical: 16,
-            borderRadius: 16,
-            alignItems: 'center',
-            marginLeft: 12,
-          }}
-        >
-          <Text style={{
-            color: '#FFFFFF',
-            fontSize: 18,
-            fontWeight: '600',
-          }}>
-            Continue
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
-  const renderReview = () => (
-    <View style={{ flex: 1, paddingHorizontal: 24 }}>
-      <View style={{ alignItems: 'center', marginBottom: 32 }}>
-        <View style={{
-          width: 80,
-          height: 80,
-          backgroundColor: '#000000',
-          borderRadius: 40,
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 16,
-        }}>
-          <Ionicons name="checkmark-circle" size={40} color="white" />
-        </View>
-        <Text style={{
-          color: '#000000',
-          fontSize: 24,
-          fontWeight: 'bold',
-          textAlign: 'center',
-          marginBottom: 8,
-        }}>
-          Review Your Profile
-        </Text>
-        <Text style={{
-          color: '#6C757D',
-          fontSize: 16,
-          textAlign: 'center',
-        }}>
-          Make sure everything looks good
-        </Text>
-      </View>
-
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-        <View style={{
-          backgroundColor: '#F8F9FA',
+      <View style={{ flex: 1 }} />
+      
+      <TouchableOpacity
+        onPress={nextStep}
+        disabled={loading}
+        style={{
+          backgroundColor: loading ? '#CCCCCC' : '#000000',
+          paddingVertical: 16,
           borderRadius: 16,
-          padding: 20,
-          marginBottom: 24,
+          alignItems: 'center',
+          marginBottom: 32,
+        }}
+      >
+        <Text style={{
+          color: '#FFFFFF',
+          fontSize: 18,
+          fontWeight: '600',
         }}>
-          <Text style={{
-            color: '#000000',
-            fontSize: 18,
-            fontWeight: '600',
-            marginBottom: 16,
-          }}>
-            Basic Info
-          </Text>
-          <Text style={{ color: '#6C757D', fontSize: 16, marginBottom: 4 }}>
-            <Text style={{ fontWeight: '600' }}>Name:</Text> {name}
-          </Text>
-          <Text style={{ color: '#6C757D', fontSize: 16, marginBottom: 4 }}>
-            <Text style={{ fontWeight: '600' }}>Age:</Text> {age}
-          </Text>
-          <Text style={{ color: '#6C757D', fontSize: 16, marginBottom: 16 }}>
-            <Text style={{ fontWeight: '600' }}>City:</Text> {city}
-          </Text>
-          
-          <Text style={{
-            color: '#000000',
-            fontSize: 18,
-            fontWeight: '600',
-            marginBottom: 16,
-          }}>
-            Bio
-          </Text>
-          <Text style={{ color: '#6C757D', fontSize: 16, marginBottom: 16 }}>
-            {bio}
-          </Text>
-          
-          <Text style={{
-            color: '#000000',
-            fontSize: 18,
-            fontWeight: '600',
-            marginBottom: 16,
-          }}>
-            Intents ({selectedIntents.length}/5)
-          </Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 16 }}>
-            {selectedIntents.map((intent, index) => (
-              <Chip
-                key={index}
-                label={intent}
-                selected={true}
-                disabled={true}
-              />
-            ))}
-          </View>
-          
-          <Text style={{
-            color: '#000000',
-            fontSize: 18,
-            fontWeight: '600',
-            marginBottom: 16,
-          }}>
-            Interests ({selectedInterests.length}/8)
-          </Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-            {selectedInterests.map((interest, index) => (
-              <Chip
-                key={index}
-                label={interest}
-                selected={true}
-                disabled={true}
-              />
-            ))}
-          </View>
-        </View>
-      </ScrollView>
-
-      <View style={{ flexDirection: 'row', marginTop: 16 }}>
-        <TouchableOpacity
-          onPress={prevStep}
-          style={{
-            flex: 1,
-            backgroundColor: '#F8F9FA',
-            paddingVertical: 16,
-            borderRadius: 16,
-            alignItems: 'center',
-            marginRight: 12,
-            borderWidth: 1,
-            borderColor: '#E9ECEF',
-          }}
-        >
-          <Text style={{
-            color: '#000000',
-            fontSize: 18,
-            fontWeight: '600',
-          }}>
-            Back
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          onPress={handleSubmit}
-          disabled={loading}
-          style={{
-            flex: 1,
-            backgroundColor: loading ? '#CCCCCC' : '#000000',
-            paddingVertical: 16,
-            borderRadius: 16,
-            alignItems: 'center',
-            marginLeft: 12,
-          }}
-        >
-          <Text style={{
-            color: '#FFFFFF',
-            fontSize: 18,
-            fontWeight: '600',
-          }}>
-            {loading ? 'Creating...' : 'Create Profile'}
-          </Text>
-        </TouchableOpacity>
-      </View>
+          {loading ? 'Creating...' : 'Create Profile'}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 
   const renderCurrentStep = () => {
     switch (currentStep) {
-      case 'basic':
-        return renderBasicInfo();
+      case 'name':
+        return renderName();
+      case 'birthdate':
+        return renderBirthdate();
+      case 'location':
+        return renderLocation();
+      case 'photos':
+        return renderPhotos();
       case 'bio':
         return renderBio();
       case 'intents':
         return renderIntents();
       case 'interests':
         return renderInterests();
-      case 'review':
-        return renderReview();
       default:
-        return renderBasicInfo();
+        return renderName();
     }
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
       <TopBar 
-        title={`Step ${['basic', 'bio', 'intents', 'interests', 'review'].indexOf(currentStep) + 1} of 5`} 
-        showBack={currentStep !== 'basic'}
+        title={`Step ${['name', 'birthdate', 'location', 'photos', 'bio', 'intents', 'interests'].indexOf(currentStep) + 1} of 7`} 
+        showBack={false}
       />
       
-      {renderStepIndicator()}
+      {renderProgressBar()}
       
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         {renderCurrentStep()}
