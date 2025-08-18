@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Logo } from '../../components/Logo';
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -18,29 +18,14 @@ export default function SplashScreen() {
       alignItems: 'center',
       paddingHorizontal: 24,
     }}>
-      {/* App Logo/Icon */}
+      {/* App Logo */}
       <View style={{
-        width: 120,
-        height: 120,
-        backgroundColor: '#000000',
-        borderRadius: 60,
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 48,
       }}>
-        <Ionicons name="people" size={60} color="white" />
+        <Logo type="text" size={80} color="#000000" />
       </View>
-
-      {/* App Name */}
-      <Text style={{
-        color: '#000000',
-        fontSize: 48,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginBottom: 16,
-      }}>
-        Brother
-      </Text>
 
       {/* Tagline */}
       <Text style={{

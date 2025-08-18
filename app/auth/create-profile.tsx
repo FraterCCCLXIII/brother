@@ -5,6 +5,7 @@ import { TopBar } from '../../components/TopBar';
 import { FormField } from '../../components/FormField';
 import { Chip } from '../../components/Chip';
 import { Ionicons } from '@expo/vector-icons';
+import { Logo } from '../../components/Logo';
 
 const { width, height } = Dimensions.get('window');
 
@@ -171,7 +172,7 @@ export default function CreateProfileScreen() {
           justifyContent: 'center',
           marginBottom: 24,
         }}>
-          <Ionicons name="person" size={40} color="white" />
+          <Logo type="icon" size={40} color="#FFFFFF" />
         </View>
         <Text style={{
           color: '#000000',
@@ -236,7 +237,7 @@ export default function CreateProfileScreen() {
           justifyContent: 'center',
           marginBottom: 24,
         }}>
-          <Ionicons name="calendar" size={40} color="white" />
+          <Logo type="icon" size={40} color="#FFFFFF" />
         </View>
         <Text style={{
           color: '#000000',
@@ -328,7 +329,7 @@ export default function CreateProfileScreen() {
           justifyContent: 'center',
           marginBottom: 24,
         }}>
-          <Ionicons name="location" size={40} color="white" />
+          <Logo type="icon" size={40} color="#FFFFFF" />
         </View>
         <Text style={{
           color: '#000000',
@@ -393,7 +394,7 @@ export default function CreateProfileScreen() {
           justifyContent: 'center',
           marginBottom: 24,
         }}>
-          <Ionicons name="camera" size={40} color="white" />
+          <Logo type="icon" size={40} color="#FFFFFF" />
         </View>
         <Text style={{
           color: '#000000',
@@ -430,7 +431,7 @@ export default function CreateProfileScreen() {
               justifyContent: 'center',
             }}
           >
-            <Ionicons name="add" size={32} color="#6C757D" />
+            <Logo type="icon" size={24} color="#6C757D" />
           </TouchableOpacity>
         ))}
       </View>
@@ -470,7 +471,7 @@ export default function CreateProfileScreen() {
           justifyContent: 'center',
           marginBottom: 24,
         }}>
-          <Ionicons name="chatbubble" size={40} color="white" />
+          <Logo type="icon" size={40} color="#FFFFFF" />
         </View>
         <Text style={{
           color: '#000000',
@@ -537,7 +538,7 @@ export default function CreateProfileScreen() {
           justifyContent: 'center',
           marginBottom: 24,
         }}>
-          <Ionicons name="search" size={40} color="white" />
+          <Logo type="icon" size={40} color="#FFFFFF" />
         </View>
         <Text style={{
           color: '#000000',
@@ -605,7 +606,7 @@ export default function CreateProfileScreen() {
           justifyContent: 'center',
           marginBottom: 24,
         }}>
-          <Ionicons name="star" size={40} color="white" />
+          <Logo type="icon" size={40} color="#FFFFFF" />
         </View>
         <Text style={{
           color: '#000000',
