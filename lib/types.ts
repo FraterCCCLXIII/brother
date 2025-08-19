@@ -4,7 +4,7 @@ export interface Profile {
   age: number;
   city: string;
   distance: number; // miles
-  photo: string;
+  photo?: string; // Made optional since we're using placeholders
   bio: string;
   intents: string[];
   interests: string[];
@@ -12,26 +12,16 @@ export interface Profile {
 
 export interface Match {
   id: string;
-  a: string; // profile ID
-  b: string; // profile ID
-  last?: string; // last message preview
+  users: string[]; // Array of profile IDs
+  lastMessage: string; // last message preview
+  timestamp: string; // ISO string
+  unreadCount: number;
 }
 
 export interface Message {
   id: string;
   matchId: string;
-  sender: string; // profile ID
-  body: string;
-  createdAt: number; // epoch ms
-}
-
-export interface IMessage {
-  _id: string;
+  senderId: string; // profile ID
   text: string;
-  createdAt: Date;
-  user: {
-    _id: string;
-    name: string;
-    avatar?: string;
-  };
+  timestamp: string; // ISO string
 }

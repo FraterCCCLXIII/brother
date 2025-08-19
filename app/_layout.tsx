@@ -7,40 +7,42 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
-      <Stack
+      <Stack 
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: '#FFFFFF' },
+          presentation: 'modal', // This creates the stacked modal effect
         }}
       >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen 
-          name="auth/login" 
-          options={{ 
-            presentation: 'modal',
-            headerShown: false 
-          }} 
+          name="index" 
+          options={{
+            presentation: 'card', // Force full-screen for splash
+          }}
         />
         <Stack.Screen 
-          name="auth/create-profile" 
-          options={{ 
-            presentation: 'modal',
-            headerShown: false 
-          }} 
+          name="(tabs)" 
+          options={{
+            presentation: 'card', // Force full-screen for main app
+          }}
         />
         <Stack.Screen 
-          name="chat/[matchId]" 
-          options={{ 
-            presentation: 'modal',
-            headerShown: false 
-          }} 
+          name="auth" 
+          options={{
+            presentation: 'card', // Force full-screen for auth
+          }}
         />
         <Stack.Screen 
-          name="report/[userId]" 
-          options={{ 
-            presentation: 'modal',
-            headerShown: false 
-          }} 
+          name="chat" 
+          options={{
+            presentation: 'card', // Force full-screen for chat
+          }}
+        />
+        <Stack.Screen 
+          name="report" 
+          options={{
+            presentation: 'card', // Force full-screen for report
+          }}
         />
       </Stack>
     </SafeAreaProvider>

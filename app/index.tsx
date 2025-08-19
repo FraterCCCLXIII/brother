@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Logo } from '../../components/Logo';
+import { Logo } from '../components/Logo';
 
 export default function SplashScreen() {
   const router = useRouter();

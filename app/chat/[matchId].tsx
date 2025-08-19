@@ -1,16 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { TopBar } from '../../components/TopBar';
 import { api } from '../../lib/api';
 import { Message } from '../../lib/types';
 
+const { height, width } = Dimensions.get('window');
+
 export default function ChatScreen() {
   const { matchId } = useLocalSearchParams<{ matchId: string }>();
   const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState('');
+  const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
     if (matchId) {
@@ -19,141 +22,146 @@ export default function ChatScreen() {
   }, [matchId]);
 
   const loadMessages = async () => {
+    if (!matchId) return;
+    
     try {
       setLoading(true);
-      const messageList = await api.listMessages(matchId);
-      setMessages(messageList);
+      const chatMessages = await api.getMessages(matchId);
+      setMessages(chatMessages);
     } catch (error) {
       console.error('Error loading messages:', error);
-      Alert.alert('Error', 'Failed to load messages');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSend = async () => {
-    if (!newMessage.trim() || !matchId) return;
+  const sendMessage = async () => {
+    if (!inputText.trim() || !matchId) return;
+
+    const messageText = inputText.trim();
+    setInputText('');
 
     try {
-      const sentMessage = await api.sendMessage(matchId, newMessage.trim());
-      setMessages(prev => [...prev, sentMessage]);
-      setNewMessage('');
+      const success = await api.sendMessage(matchId, 'me', messageText);
+      if (success) {
+        // Reload messages to get the updated list
+        await loadMessages();
+        // Scroll to bottom
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: true });
+        }, 100);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
-      Alert.alert('Error', 'Failed to send message');
     }
   };
 
   const renderMessage = ({ item }: { item: Message }) => {
-    const isOwnMessage = item.sender === 'current_user';
+    const isMyMessage = item.senderId === 'me';
     
     return (
       <View style={{
-        alignSelf: isOwnMessage ? 'flex-end' : 'flex-start',
+        flexDirection: 'row',
+        justifyContent: isMyMessage ? 'flex-end' : 'flex-start',
         marginVertical: 4,
-        marginHorizontal: 16,
-        maxWidth: '80%',
+        paddingHorizontal: 16,
       }}>
         <View style={{
-          backgroundColor: isOwnMessage ? '#000000' : '#F8F9FA',
+          backgroundColor: isMyMessage ? '#000000' : '#F8F9FA',
           paddingHorizontal: 16,
-          paddingVertical: 8,
+          paddingVertical: 12,
           borderRadius: 20,
-          borderWidth: isOwnMessage ? 0 : 1,
-          borderColor: '#E9ECEF',
+          maxWidth: width * 0.7,
         }}>
           <Text style={{
-            color: isOwnMessage ? '#FFFFFF' : '#000000',
+            color: isMyMessage ? '#FFFFFF' : '#000000',
             fontSize: 16,
+            lineHeight: 20,
           }}>
-            {item.body}
+            {item.text}
           </Text>
         </View>
-        <Text style={{
-          color: '#6C757D',
-          fontSize: 12,
-          marginTop: 4,
-          textAlign: isOwnMessage ? 'right' : 'left',
-        }}>
-          {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </Text>
       </View>
     );
   };
 
   if (loading) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
-        <TopBar title="Chat" showBack />
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: '#000000', fontSize: 16 }}>Loading chat...</Text>
-        </View>
+      <View style={{ flex: 1, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: '#000000', fontSize: 16 }}>Loading chat...</Text>
       </View>
     );
   }
 
   return (
-    <KeyboardAvoidingView 
-      style={{ flex: 1, backgroundColor: '#FFFFFF' }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <TopBar title="Chat" showBack />
+    <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+      <TopBar title="Chat" />
       
-      <FlatList
-        data={messages}
-        renderItem={renderMessage}
-        keyExtractor={(item) => item.id}
+      <KeyboardAvoidingView 
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingVertical: 16 }}
-        showsVerticalScrollIndicator={false}
-      />
-      
-      <View style={{
-        flexDirection: 'row',
-        padding: 16,
-        borderTopWidth: 1,
-        borderTopColor: '#E9ECEF',
-        backgroundColor: '#FFFFFF',
-      }}>
-        <TextInput
-          style={{
-            flex: 1,
-            backgroundColor: '#F8F9FA',
-            borderWidth: 1,
-            borderColor: '#E9ECEF',
-            borderRadius: 20,
-            paddingHorizontal: 16,
-            paddingVertical: 12,
-            marginRight: 12,
-            fontSize: 16,
-            color: '#000000',
-          }}
-          placeholder="Type a message..."
-          placeholderTextColor="#6C757D"
-          value={newMessage}
-          onChangeText={setNewMessage}
-          multiline
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      >
+        {/* Messages */}
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          renderItem={renderMessage}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingVertical: 16 }}
+          showsVerticalScrollIndicator={false}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
         />
-        <TouchableOpacity
-          onPress={handleSend}
-          disabled={!newMessage.trim()}
-          style={{
-            backgroundColor: newMessage.trim() ? '#000000' : '#E9ECEF',
-            paddingHorizontal: 20,
-            paddingVertical: 12,
-            borderRadius: 20,
-            justifyContent: 'center',
-          }}
-        >
-          <Text style={{
-            color: newMessage.trim() ? '#FFFFFF' : '#6C757D',
-            fontSize: 16,
-            fontWeight: '600',
-          }}>
-            Send
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+
+        {/* Input */}
+        <View style={{
+          flexDirection: 'row',
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+          borderTopWidth: 1,
+          borderTopColor: '#E9ECEF',
+          backgroundColor: '#FFFFFF',
+        }}>
+          <TextInput
+            style={{
+              flex: 1,
+              backgroundColor: '#F8F9FA',
+              borderRadius: 20,
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              marginRight: 12,
+              fontSize: 16,
+              color: '#000000',
+            }}
+            placeholder="Type a message..."
+            placeholderTextColor="#6C757D"
+            value={inputText}
+            onChangeText={setInputText}
+            multiline
+            maxLength={500}
+          />
+          <TouchableOpacity
+            onPress={sendMessage}
+            disabled={!inputText.trim()}
+            style={{
+              backgroundColor: inputText.trim() ? '#000000' : '#E9ECEF',
+              borderRadius: 20,
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Text style={{
+              color: inputText.trim() ? '#FFFFFF' : '#6C757D',
+              fontSize: 16,
+              fontWeight: '600',
+            }}>
+              Send
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </View>
   );
 }

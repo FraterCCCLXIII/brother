@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "icon": "./b-logo.svg",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "splash": {
       "image": "./logo.svg",
       "resizeMode": "contain",
@@ -19,8 +18,7 @@
       "adaptiveIcon": {
         "foregroundImage": "./b-logo.svg",
         "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true
+      }
     },
     "web": {
       "favicon": "./b-logo.svg"
