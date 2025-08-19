@@ -3,39 +3,35 @@ import { TouchableOpacity, Text } from 'react-native';
 
 interface ChipProps {
   label: string;
-  selected?: boolean;
-  onPress?: () => void;
+  selected: boolean;
+  onPress: () => void;
   disabled?: boolean;
 }
 
-export const Chip: React.FC<ChipProps> = ({ 
-  label, 
-  selected = false, 
-  onPress, 
-  disabled = false 
-}) => {
+export const Chip: React.FC<ChipProps> = ({ label, selected, onPress, disabled = false }) => {
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled}
-      className={`
-        px-3 py-2 rounded-full mr-2 mb-2
-        ${selected 
-          ? 'bg-accent' 
-          : 'bg-gray-700 border border-gray-600'
-        }
-        ${disabled ? 'opacity-50' : ''}
-      `}
-      accessibilityLabel={label}
-      accessibilityRole="button"
-      accessibilityState={{ selected, disabled }}
+      style={{
+        backgroundColor: selected ? '#000000' : '#F8F9FA',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: selected ? '#000000' : '#E9ECEF',
+        marginBottom: 8,
+        marginRight: 8,
+        opacity: disabled ? 0.5 : 1,
+      }}
+      activeOpacity={0.7}
     >
-      <Text 
-        className={`
-          text-sm font-medium
-          ${selected ? 'text-black' : 'text-text'}
-        `}
-      >
+      <Text style={{
+        color: selected ? '#FFFFFF' : '#000000',
+        fontSize: 14,
+        fontWeight: selected ? '600' : '500',
+        textAlign: 'left',
+      }}>
         {label}
       </Text>
     </TouchableOpacity>

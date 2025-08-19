@@ -1,173 +1,167 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, Alert } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { GiftedChat, IMessage, User } from 'react-native-gifted-chat';
 import { TopBar } from '../../components/TopBar';
 import { api } from '../../lib/api';
-import { Message, Match } from '../../lib/types';
-import { mockProfiles } from '../../lib/mock';
+import { Message } from '../../lib/types';
+
+const { height, width } = Dimensions.get('window');
 
 export default function ChatScreen() {
   const { matchId } = useLocalSearchParams<{ matchId: string }>();
-  const [messages, setMessages] = useState<IMessage[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(true);
-  const [match, setMatch] = useState<Match | null>(null);
   const router = useRouter();
+  const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
     if (matchId) {
-      loadChatData();
+      loadMessages();
     }
   }, [matchId]);
 
-  const loadChatData = async () => {
+  const loadMessages = async () => {
+    if (!matchId) return;
+    
     try {
       setLoading(true);
-      
-      // Load match details
-      const allMatches = await api.listMatches();
-      const currentMatch = allMatches.find(m => m.id === matchId);
-      if (!currentMatch) {
-        Alert.alert('Error', 'Match not found');
-        router.back();
-        return;
-      }
-      setMatch(currentMatch);
-      
-      // Load messages
-      const chatMessages = await api.listMessages(matchId);
-      const formattedMessages = chatMessages.map((msg): IMessage => ({
-        _id: msg.id,
-        text: msg.body,
-        createdAt: new Date(msg.createdAt),
-        user: {
-          _id: msg.sender,
-          name: msg.sender === 'current_user' ? 'You' : 'Match',
-        },
-      }));
-      
-      setMessages(formattedMessages);
+      const chatMessages = await api.getMessages(matchId);
+      setMessages(chatMessages);
     } catch (error) {
-      console.error('Error loading chat data:', error);
-      Alert.alert('Error', 'Failed to load chat');
+      console.error('Error loading messages:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const onSend = useCallback(async (newMessages: IMessage[] = []) => {
-    if (!matchId) return;
-    
+  const sendMessage = async () => {
+    if (!inputText.trim() || !matchId) return;
+
+    const messageText = inputText.trim();
+    setInputText('');
+
     try {
-      const messageText = newMessages[0]?.text;
-      if (!messageText) return;
-      
-      // Send message via API
-      const sentMessage = await api.sendMessage(matchId, messageText);
-      
-      // Add to local state
-      const formattedMessage: IMessage = {
-        _id: sentMessage.id,
-        text: sentMessage.body,
-        createdAt: new Date(sentMessage.createdAt),
-        user: {
-          _id: sentMessage.sender,
-          name: 'You',
-        },
-      };
-      
-      setMessages(previousMessages => 
-        GiftedChat.append(previousMessages, [formattedMessage])
-      );
+      const success = await api.sendMessage(matchId, 'me', messageText);
+      if (success) {
+        // Reload messages to get the updated list
+        await loadMessages();
+        // Scroll to bottom
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: true });
+        }, 100);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
-      Alert.alert('Error', 'Failed to send message');
     }
-  }, [matchId]);
-
-  const getOtherProfile = () => {
-    if (!match) return null;
-    const otherProfileId = match.a === 'current_user' ? match.b : match.a;
-    return mockProfiles.find(p => p.id === otherProfileId);
   };
 
-  const otherProfile = getOtherProfile();
-
-  if (loading) {
+  const renderMessage = ({ item }: { item: Message }) => {
+    const isMyMessage = item.senderId === 'me';
+    
     return (
-      <View className="flex-1 bg-bg">
-        <TopBar title="Chat" showBack />
-        <View className="flex-1 items-center justify-center">
-          <Text className="text-text text-lg">Loading chat...</Text>
+      <View style={{
+        flexDirection: 'row',
+        justifyContent: isMyMessage ? 'flex-end' : 'flex-start',
+        marginVertical: 4,
+        paddingHorizontal: 16,
+      }}>
+        <View style={{
+          backgroundColor: isMyMessage ? '#000000' : '#F8F9FA',
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+          borderRadius: 20,
+          maxWidth: width * 0.7,
+        }}>
+          <Text style={{
+            color: isMyMessage ? '#FFFFFF' : '#000000',
+            fontSize: 16,
+            lineHeight: 20,
+          }}>
+            {item.text}
+          </Text>
         </View>
       </View>
     );
-  }
+  };
 
-  if (!match || !otherProfile) {
+  if (loading) {
     return (
-      <View className="flex-1 bg-bg">
-        <TopBar title="Chat" showBack />
-        <View className="flex-1 items-center justify-center">
-          <Text className="text-text text-lg">Chat not found</Text>
-        </View>
+      <View style={{ flex: 1, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: '#000000', fontSize: 16 }}>Loading chat...</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-bg">
-      <TopBar 
-        title={otherProfile.name} 
-        showBack 
-      />
+    <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+      <TopBar title="Chat" />
       
-      <GiftedChat
-        messages={messages}
-        onSend={onSend}
-        user={{
-          _id: 'current_user',
-          name: 'You',
-        }}
-        placeholder="Type a message..."
-        textInputStyle={{
-          backgroundColor: '#111216',
-          color: '#F2F2F7',
-          borderRadius: 20,
+      <KeyboardAvoidingView 
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      >
+        {/* Messages */}
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          renderItem={renderMessage}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingVertical: 16 }}
+          showsVerticalScrollIndicator={false}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
+        />
+
+        {/* Input */}
+        <View style={{
+          flexDirection: 'row',
           paddingHorizontal: 16,
-          paddingVertical: 8,
-        }}
-        renderAvatar={() => null}
-        alwaysShowSend
-        scrollToBottom
-        infiniteScroll
-        keyboardShouldPersistTaps="handled"
-        renderUsernameOnMessage
-        showUserAvatar
-        showAvatarForEveryMessage={false}
-        renderAvatarOnTop
-        renderBubble={(props) => (
-          <View
+          paddingVertical: 12,
+          borderTopWidth: 1,
+          borderTopColor: '#E9ECEF',
+          backgroundColor: '#FFFFFF',
+        }}>
+          <TextInput
             style={{
-              backgroundColor: props.position === 'left' ? '#374151' : '#4ADE80',
-              paddingHorizontal: 16,
-              paddingVertical: 8,
+              flex: 1,
+              backgroundColor: '#F8F9FA',
               borderRadius: 20,
-              maxWidth: '80%',
-              marginBottom: 8,
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              marginRight: 12,
+              fontSize: 16,
+              color: '#000000',
+            }}
+            placeholder="Type a message..."
+            placeholderTextColor="#6C757D"
+            value={inputText}
+            onChangeText={setInputText}
+            multiline
+            maxLength={500}
+          />
+          <TouchableOpacity
+            onPress={sendMessage}
+            disabled={!inputText.trim()}
+            style={{
+              backgroundColor: inputText.trim() ? '#000000' : '#E9ECEF',
+              borderRadius: 20,
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            <Text
-              style={{
-                color: props.position === 'left' ? '#F2F2F7' : '#000000',
-                fontSize: 16,
-              }}
-            >
-              {props.currentMessage?.text}
+            <Text style={{
+              color: inputText.trim() ? '#FFFFFF' : '#6C757D',
+              fontSize: 16,
+              fontWeight: '600',
+            }}>
+              Send
             </Text>
-          </View>
-        )}
-      />
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }

@@ -51,15 +51,43 @@ export default function SettingsScreen() {
     subtitle?: string; 
     children?: React.ReactNode; 
   }) => (
-    <View className="flex-row items-center justify-between p-4 bg-card border-b border-gray-800">
-      <View className="flex-row items-center flex-1">
-        <View className="w-10 h-10 bg-gray-700 rounded-full items-center justify-center mr-4">
-          <Ionicons name={icon as any} size={20} color="#F2F2F7" />
+    <View style={{
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: 16,
+      backgroundColor: '#FFFFFF',
+      borderBottomWidth: 1,
+      borderBottomColor: '#E9ECEF',
+    }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+        <View style={{
+          width: 40,
+          height: 40,
+          backgroundColor: '#F8F9FA',
+          borderRadius: 20,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginRight: 16,
+        }}>
+          <Ionicons name={icon as any} size={20} color="#000000" />
         </View>
-        <View className="flex-1">
-          <Text className="text-text text-base font-medium">{title}</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={{
+            color: '#000000',
+            fontSize: 16,
+            fontWeight: '500',
+          }}>
+            {title}
+          </Text>
           {subtitle && (
-            <Text className="text-sub text-sm mt-1">{subtitle}</Text>
+            <Text style={{
+              color: '#6C757D',
+              fontSize: 14,
+              marginTop: 4,
+            }}>
+              {subtitle}
+            </Text>
           )}
         </View>
       </View>
@@ -68,13 +96,21 @@ export default function SettingsScreen() {
   );
 
   return (
-    <View className="flex-1 bg-bg">
+    <View style={{ flex: 1, backgroundColor: '#F8F9FA' }}>
       <TopBar title="Settings" />
       
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         {/* Account Settings */}
-        <View className="mt-4">
-          <Text className="text-sub text-sm font-medium px-4 mb-2">ACCOUNT</Text>
+        <View style={{ marginTop: 16 }}>
+          <Text style={{
+            color: '#6C757D',
+            fontSize: 14,
+            fontWeight: '500',
+            paddingHorizontal: 16,
+            marginBottom: 8,
+          }}>
+            ACCOUNT
+          </Text>
           
           <SettingItem
             icon="pause-circle"
@@ -84,53 +120,109 @@ export default function SettingsScreen() {
             <Switch
               value={isPaused}
               onValueChange={handlePauseAccount}
-              trackColor={{ false: '#374151', true: '#4ADE80' }}
-              thumbColor={isPaused ? '#FFFFFF' : '#F3F4F6'}
+              trackColor={{ false: '#E9ECEF', true: '#000000' }}
+              thumbColor={isPaused ? '#FFFFFF' : '#FFFFFF'}
             />
           </SettingItem>
         </View>
 
         {/* Preferences */}
-        <View className="mt-6">
-          <Text className="text-sub text-sm font-medium px-4 mb-2">PREFERENCES</Text>
+        <View style={{ marginTop: 24 }}>
+          <Text style={{
+            color: '#6C757D',
+            fontSize: 14,
+            fontWeight: '500',
+            paddingHorizontal: 16,
+            marginBottom: 8,
+          }}>
+            PREFERENCES
+          </Text>
           
           <SettingItem
             icon="location"
             title="Distance Radius"
             subtitle={`${distanceRadius} miles`}
           >
-            <View className="flex-row items-center">
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 onPress={() => handleDistanceChange(Math.max(1, distanceRadius - 5))}
-                className="w-8 h-8 bg-gray-700 rounded-full items-center justify-center mr-2"
+                style={{
+                  width: 32,
+                  height: 32,
+                  backgroundColor: '#F8F9FA',
+                  borderRadius: 16,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: 8,
+                }}
               >
-                <Ionicons name="remove" size={16} color="#F2F2F7" />
+                <Ionicons name="remove" size={16} color="#000000" />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => handleDistanceChange(Math.min(100, distanceRadius + 5))}
-                className="w-8 h-8 bg-gray-700 rounded-full items-center justify-center"
+                style={{
+                  width: 32,
+                  height: 32,
+                  backgroundColor: '#F8F9FA',
+                  borderRadius: 16,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
               >
-                <Ionicons name="add" size={16} color="#F2F2F7" />
+                <Ionicons name="add" size={16} color="#000000" />
               </TouchableOpacity>
             </View>
           </SettingItem>
         </View>
 
         {/* Danger Zone */}
-        <View className="mt-6 mb-8">
-          <Text className="text-sub text-sm font-medium px-4 mb-2">DANGER ZONE</Text>
+        <View style={{ marginTop: 24, marginBottom: 32 }}>
+          <Text style={{
+            color: '#6C757D',
+            fontSize: 14,
+            fontWeight: '500',
+            paddingHorizontal: 16,
+            marginBottom: 8,
+          }}>
+            DANGER ZONE
+          </Text>
           
           <TouchableOpacity
             onPress={handleDeleteAccount}
-            className="p-4 bg-card border border-danger/20"
+            style={{
+              padding: 16,
+              backgroundColor: '#FFFFFF',
+              borderWidth: 1,
+              borderColor: '#FECACA',
+              marginHorizontal: 16,
+              borderRadius: 16,
+            }}
           >
-            <View className="flex-row items-center">
-              <View className="w-10 h-10 bg-danger/20 rounded-full items-center justify-center mr-4">
-                <Ionicons name="trash" size={20} color="#F87171" />
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{
+                width: 40,
+                height: 40,
+                backgroundColor: '#FEE2E2',
+                borderRadius: 20,
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginRight: 16,
+              }}>
+                <Ionicons name="trash" size={20} color="#DC2626" />
               </View>
-              <View className="flex-1">
-                <Text className="text-danger text-base font-medium">Delete Account</Text>
-                <Text className="text-sub text-sm mt-1">
+              <View style={{ flex: 1 }}>
+                <Text style={{
+                  color: '#DC2626',
+                  fontSize: 16,
+                  fontWeight: '500',
+                }}>
+                  Delete Account
+                </Text>
+                <Text style={{
+                  color: '#6C757D',
+                  fontSize: 14,
+                  marginTop: 4,
+                }}>
                   Permanently remove your account and all data
                 </Text>
               </View>

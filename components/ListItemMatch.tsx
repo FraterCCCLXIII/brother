@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { Image } from 'expo-image';
-import { Match, Profile } from '../lib/types';
-import { mockProfiles } from '../lib/mock';
+import { View, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { Match } from '../lib/types';
+
+const { width } = Dimensions.get('window');
 
 interface ListItemMatchProps {
   match: Match;
@@ -10,48 +10,83 @@ interface ListItemMatchProps {
 }
 
 export const ListItemMatch: React.FC<ListItemMatchProps> = ({ match, onPress }) => {
-  // Find the other person's profile (not the current user)
-  const otherProfileId = match.a === 'current_user' ? match.b : match.a;
-  const otherProfile = mockProfiles.find(p => p.id === otherProfileId);
+  // For now, we'll show a placeholder since we don't have the other user's profile
+  // In a real app, you'd fetch the other user's profile data
+  const otherUserId = match.users.find(id => id !== 'me') || 'unknown';
   
-  if (!otherProfile) return null;
-
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="flex-row items-center p-4 bg-card border-b border-gray-800"
-      accessibilityLabel={`Chat with ${otherProfile.name}`}
-      accessibilityRole="button"
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E9ECEF',
+        backgroundColor: '#FFFFFF',
+      }}
+      activeOpacity={0.7}
     >
-      {/* Avatar */}
-      <View className="w-14 h-14 rounded-full overflow-hidden mr-4">
-        <Image
-          source={{ uri: otherProfile.photo }}
-          className="w-full h-full"
-          contentFit="cover"
-          cachePolicy="memory-disk"
-        />
+      {/* Avatar Placeholder */}
+      <View style={{
+        width: 60,
+        height: 60,
+        backgroundColor: '#F8F9FA',
+        borderRadius: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 16,
+      }}>
+        <Text style={{ color: '#6C757D', fontSize: 24, fontWeight: 'bold' }}>
+          {otherUserId.charAt(0).toUpperCase()}
+        </Text>
       </View>
-      
-      {/* Profile Info */}
-      <View className="flex-1">
-        <Text className="text-text text-lg font-semibold mb-1">
-          {otherProfile.name}
+
+      {/* Match Info */}
+      <View style={{ flex: 1 }}>
+        <Text style={{
+          color: '#000000',
+          fontSize: 18,
+          fontWeight: '600',
+          marginBottom: 4,
+        }}>
+          User {otherUserId}
         </Text>
-        <Text className="text-sub text-sm mb-1">
-          {otherProfile.age} • {otherProfile.city}
+        <Text style={{
+          color: '#6C757D',
+          fontSize: 14,
+          marginBottom: 4,
+        }}>
+          {match.lastMessage}
         </Text>
-        {match.last && (
-          <Text className="text-text text-sm" numberOfLines={1}>
-            {match.last}
+        <Text style={{
+          color: '#6C757D',
+          fontSize: 12,
+        }}>
+          {new Date(match.timestamp).toLocaleDateString()}
+        </Text>
+      </View>
+
+      {/* Unread Badge */}
+      {match.unreadCount > 0 && (
+        <View style={{
+          backgroundColor: '#000000',
+          borderRadius: 10,
+          minWidth: 20,
+          height: 20,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <Text style={{
+            color: '#FFFFFF',
+            fontSize: 12,
+            fontWeight: '600',
+          }}>
+            {match.unreadCount}
           </Text>
-        )}
-      </View>
-      
-      {/* Arrow */}
-      <View className="ml-2">
-        <Text className="text-sub text-lg">›</Text>
-      </View>
+        </View>
+      )}
     </TouchableOpacity>
   );
 };

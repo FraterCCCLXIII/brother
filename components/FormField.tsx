@@ -14,23 +14,43 @@ export const FormField: React.FC<FormFieldProps> = ({
   ...inputProps 
 }) => {
   return (
-    <View className="mb-4">
-      <Text className="text-text text-sm font-medium mb-2">
+    <View style={{ marginBottom: 20 }}>
+      <Text style={{ 
+        color: '#000000', 
+        fontSize: 16, 
+        fontWeight: '600', 
+        marginBottom: 8,
+        paddingHorizontal: 4,
+      }}>
         {label}
-        {required && <Text className="text-danger"> *</Text>}
+        {required && <Text style={{ color: '#DC3545' }}> *</Text>}
       </Text>
       <TextInput
-        className={`
-          bg-card border rounded-2xl px-4 py-3 text-text text-base
-          ${error ? 'border-danger' : 'border-gray-600'}
-        `}
-        placeholderTextColor="#A1A1AA"
+        style={{
+          backgroundColor: '#F8F9FA',
+          borderWidth: 1,
+          borderColor: error ? '#DC3545' : '#E9ECEF',
+          borderRadius: 16,
+          paddingHorizontal: 20,
+          paddingVertical: 16,
+          color: '#000000',
+          fontSize: 16,
+          minHeight: 56,
+        }}
+        placeholderTextColor="#6C757D"
         accessibilityLabel={label}
         accessibilityRole="text"
         {...inputProps}
       />
       {error && (
-        <Text className="text-danger text-sm mt-1">{error}</Text>
+        <Text style={{ 
+          color: '#DC3545', 
+          fontSize: 14, 
+          marginTop: 8,
+          paddingHorizontal: 4,
+        }}>
+          {error}
+        </Text>
       )}
     </View>
   );

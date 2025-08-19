@@ -39,3 +39,4 @@ jest.mock('react-native-gifted-chat', () => ({
 jest.mock('@expo/vector-icons', () => ({
   Ionicons: 'Ionicons',
 }));
+

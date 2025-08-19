@@ -4,12 +4,12 @@
     "slug": "brother",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./b-logo.svg",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./logo.svg",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0B0B0F"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -19,18 +19,14 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./b-logo.svg",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B0B0F"
+      }
     },
     "web": {
-      "favicon": "./b-logo.svg",
-      "bundler": "webpack"
+      "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-router"
-    ],
     "scheme": "brother"
   }
 }
+

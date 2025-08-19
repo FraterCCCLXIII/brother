@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { TopBar } from '../../components/TopBar';
 import { FormField } from '../../components/FormField';
 import { Chip } from '../../components/Chip';
 import { Ionicons } from '@expo/vector-icons';
+import { Logo } from '../../components/Logo';
+
+const { width, height } = Dimensions.get('window');
 
 const availableIntents = [
   'Workout Buddy', 'Coffee Friend', 'Hiking Partner', 'Board Game Night',
@@ -24,9 +27,14 @@ const availableInterests = [
   'Comics', 'Business', 'Self-Development'
 ];
 
+type ProfileStep = 'name' | 'birthdate' | 'location' | 'photos' | 'bio' | 'intents' | 'interests';
+
 export default function CreateProfileScreen() {
+  const [currentStep, setCurrentStep] = useState<ProfileStep>('name');
   const [name, setName] = useState('');
-  const [age, setAge] = useState('');
+  const [birthMonth, setBirthMonth] = useState('');
+  const [birthDay, setBirthDay] = useState('');
+  const [birthYear, setBirthYear] = useState('');
   const [city, setCity] = useState('');
   const [bio, setBio] = useState('');
   const [selectedIntents, setSelectedIntents] = useState<string[]>([]);
@@ -50,38 +58,54 @@ export default function CreateProfileScreen() {
     );
   };
 
-  const handleSubmit = async () => {
-    // Basic validation
-    if (!name.trim()) {
-      Alert.alert('Error', 'Please enter your name');
-      return;
+  const nextStep = () => {
+    if (currentStep === 'name') {
+      if (!name.trim()) {
+        Alert.alert('Error', 'Please enter your name');
+        return;
+      }
+      setCurrentStep('birthdate');
+    } else if (currentStep === 'birthdate') {
+      if (!birthMonth || !birthDay || !birthYear) {
+        Alert.alert('Error', 'Please fill in all birthdate fields');
+        return;
+      }
+      const age = new Date().getFullYear() - parseInt(birthYear);
+      if (age < 18) {
+        Alert.alert('Error', 'You must be at least 18 years old');
+        return;
+      }
+      setCurrentStep('location');
+    } else if (currentStep === 'location') {
+      if (!city.trim()) {
+        Alert.alert('Error', 'Please set your location');
+        return;
+      }
+      setCurrentStep('photos');
+    } else if (currentStep === 'photos') {
+      setCurrentStep('bio');
+    } else if (currentStep === 'bio') {
+      if (!bio.trim()) {
+        Alert.alert('Error', 'Please write a short bio');
+        return;
+      }
+      setCurrentStep('intents');
+    } else if (currentStep === 'intents') {
+      if (selectedIntents.length === 0) {
+        Alert.alert('Error', 'Please select at least one intent');
+        return;
+      }
+      setCurrentStep('interests');
+    } else if (currentStep === 'interests') {
+      if (selectedInterests.length === 0) {
+        Alert.alert('Error', 'Please select at least one interest');
+        return;
+      }
+      handleSubmit();
     }
-    
-    if (!age.trim() || parseInt(age) < 18) {
-      Alert.alert('Error', 'You must be at least 18 years old');
-      return;
-    }
-    
-    if (!city.trim()) {
-      Alert.alert('Error', 'Please enter your city');
-      return;
-    }
-    
-    if (!bio.trim()) {
-      Alert.alert('Error', 'Please write a short bio');
-      return;
-    }
-    
-    if (selectedIntents.length === 0) {
-      Alert.alert('Error', 'Please select at least one intent');
-      return;
-    }
-    
-    if (selectedInterests.length === 0) {
-      Alert.alert('Error', 'Please select at least one interest');
-      return;
-    }
+  };
 
+  const handleSubmit = async () => {
     setLoading(true);
     
     // Simulate profile creation
@@ -100,118 +124,577 @@ export default function CreateProfileScreen() {
     }, 1000);
   };
 
-  return (
-    <View className="flex-1 bg-bg">
-      <TopBar title="Create Profile" showBack />
+  const renderProgressBar = () => {
+    const steps = ['name', 'birthdate', 'location', 'photos', 'bio', 'intents', 'interests'];
+    const currentIndex = steps.indexOf(currentStep);
+    const progress = (currentIndex + 1) / steps.length;
+    
+    return (
+      <View style={{
+        paddingHorizontal: 24,
+        paddingVertical: 16,
+      }}>
+        <View style={{
+          width: '100%',
+          height: 4,
+          backgroundColor: '#E9ECEF',
+          borderRadius: 2,
+          overflow: 'hidden',
+        }}>
+          <View style={{
+            width: `${progress * 100}%`,
+            height: '100%',
+            backgroundColor: '#000000',
+            borderRadius: 2,
+          }} />
+        </View>
+        <Text style={{
+          color: '#6C757D',
+          fontSize: 14,
+          textAlign: 'center',
+          marginTop: 8,
+        }}>
+          Step {currentIndex + 1} of {steps.length}
+        </Text>
+      </View>
+    );
+  };
+
+  const renderName = () => (
+    <View style={{ flex: 1, paddingHorizontal: 24 }}>
+      <View style={{ alignItems: 'center', marginBottom: 48 }}>
+        <View style={{
+          width: 80,
+          height: 80,
+          backgroundColor: '#000000',
+          borderRadius: 40,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 24,
+        }}>
+          <Logo type="icon" size={40} color="#FFFFFF" />
+        </View>
+        <Text style={{
+          color: '#000000',
+          fontSize: 28,
+          fontWeight: 'bold',
+          textAlign: 'center',
+          marginBottom: 12,
+        }}>
+          What's your name?
+        </Text>
+        <Text style={{
+          color: '#6C757D',
+          fontSize: 16,
+          textAlign: 'center',
+          lineHeight: 24,
+        }}>
+          This is how other users will see you
+        </Text>
+      </View>
+
+      <FormField
+        label="Name"
+        placeholder="Enter your name"
+        value={name}
+        onChangeText={setName}
+        autoCapitalize="words"
+        required
+      />
+
+      <View style={{ flex: 1 }} />
       
-      <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
-        <View className="items-center mb-8">
-          <View className="w-20 h-20 bg-accent rounded-full items-center justify-center mb-4">
-            <Ionicons name="person" size={40} color="black" />
-          </View>
-          <Text className="text-text text-2xl font-bold text-center mb-2">
-            Tell us about yourself
-          </Text>
-          <Text className="text-sub text-base text-center">
-            Help others get to know you better
-          </Text>
+      <TouchableOpacity
+        onPress={nextStep}
+        style={{
+          backgroundColor: '#000000',
+          paddingVertical: 16,
+          borderRadius: 16,
+          alignItems: 'center',
+          marginBottom: 32,
+        }}
+      >
+        <Text style={{
+          color: '#FFFFFF',
+          fontSize: 18,
+          fontWeight: '600',
+        }}>
+          Continue
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderBirthdate = () => (
+    <View style={{ flex: 1, paddingHorizontal: 24 }}>
+      <View style={{ alignItems: 'center', marginBottom: 48 }}>
+        <View style={{
+          width: 80,
+          height: 80,
+          backgroundColor: '#000000',
+          borderRadius: 40,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 24,
+        }}>
+          <Logo type="icon" size={40} color="#FFFFFF" />
         </View>
+        <Text style={{
+          color: '#000000',
+          fontSize: 28,
+          fontWeight: 'bold',
+          textAlign: 'center',
+          marginBottom: 12,
+        }}>
+          When's your birthday?
+        </Text>
+        <Text style={{
+          color: '#6C757D',
+          fontSize: 16,
+          textAlign: 'center',
+          lineHeight: 24,
+        }}>
+          Only your age will be displayed to other users
+        </Text>
+      </View>
 
-        {/* Basic Info */}
-        <FormField
-          label="Full Name"
-          placeholder="Enter your full name"
-          value={name}
-          onChangeText={setName}
-          autoCapitalize="words"
-          required
-        />
-        
-        <FormField
-          label="Age"
-          placeholder="Enter your age"
-          value={age}
-          onChangeText={setAge}
-          keyboardType="numeric"
-          maxLength={2}
-          required
-        />
-        
-        <FormField
-          label="City"
-          placeholder="Enter your city"
-          value={city}
-          onChangeText={setCity}
-          autoCapitalize="words"
-          required
-        />
-        
-        <FormField
-          label="Bio"
-          placeholder="Tell us about yourself, what you're looking for, etc."
-          value={bio}
-          onChangeText={setBio}
-          multiline
-          numberOfLines={4}
-          textAlignVertical="top"
-          required
-        />
-
-        {/* Intents */}
-        <View className="mb-6">
-          <Text className="text-text text-base font-medium mb-3">
-            What are you looking for? *
-          </Text>
-          <Text className="text-sub text-sm mb-3">
-            Select up to 5 intents
-          </Text>
-          <View className="flex-row flex-wrap">
-            {availableIntents.map((intent) => (
-              <Chip
-                key={intent}
-                label={intent}
-                selected={selectedIntents.includes(intent)}
-                onPress={() => handleIntentToggle(intent)}
-                disabled={selectedIntents.length >= 5 && !selectedIntents.includes(intent)}
-              />
-            ))}
-          </View>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
+        <View style={{ flex: 1 }}>
+          <FormField
+            label="Month"
+            placeholder="MM"
+            value={birthMonth}
+            onChangeText={setBirthMonth}
+            keyboardType="numeric"
+            maxLength={2}
+            required
+          />
         </View>
-
-        {/* Interests */}
-        <View className="mb-8">
-          <Text className="text-text text-base font-medium mb-3">
-            What are your interests? *
-          </Text>
-          <Text className="text-sub text-sm mb-3">
-            Select up to 8 interests
-          </Text>
-          <View className="flex-row flex-wrap">
-            {availableInterests.map((interest) => (
-              <Chip
-                key={interest}
-                label={interest}
-                selected={selectedInterests.includes(interest)}
-                onPress={() => handleInterestToggle(interest)}
-                disabled={selectedInterests.length >= 8 && !selectedInterests.includes(interest)}
-              />
-            ))}
-          </View>
+        <View style={{ flex: 1 }}>
+          <FormField
+            label="Day"
+            placeholder="DD"
+            value={birthDay}
+            onChangeText={setBirthDay}
+            keyboardType="numeric"
+            maxLength={2}
+            required
+          />
         </View>
+        <View style={{ flex: 1 }}>
+          <FormField
+            label="Year"
+            placeholder="YYYY"
+            value={birthYear}
+            onChangeText={setBirthYear}
+            keyboardType="numeric"
+            maxLength={4}
+            required
+          />
+        </View>
+      </View>
 
-        {/* Submit Button */}
-        <TouchableOpacity
-          onPress={handleSubmit}
-          disabled={loading}
-          className={`
-            bg-accent py-4 rounded-2xl items-center mb-8
-            ${loading ? 'opacity-50' : ''}
-          `}
-        >
-          <Text className="text-black text-lg font-semibold">
-            {loading ? 'Creating Profile...' : 'Create Profile'}
-          </Text>
-        </TouchableOpacity>
+      <View style={{ flex: 1 }} />
+      
+      <TouchableOpacity
+        onPress={nextStep}
+        style={{
+          backgroundColor: '#000000',
+          paddingVertical: 16,
+          borderRadius: 16,
+          alignItems: 'center',
+          marginBottom: 32,
+        }}
+      >
+        <Text style={{
+          color: '#FFFFFF',
+          fontSize: 18,
+          fontWeight: '600',
+        }}>
+          Continue
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderLocation = () => (
+    <View style={{ flex: 1, paddingHorizontal: 24 }}>
+      <View style={{ alignItems: 'center', marginBottom: 48 }}>
+        <View style={{
+          width: 80,
+          height: 80,
+          backgroundColor: '#000000',
+          borderRadius: 40,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 24,
+        }}>
+          <Logo type="icon" size={40} color="#FFFFFF" />
+        </View>
+        <Text style={{
+          color: '#000000',
+          fontSize: 28,
+          fontWeight: 'bold',
+          textAlign: 'center',
+          marginBottom: 12,
+        }}>
+          Set your location
+        </Text>
+        <Text style={{
+          color: '#6C757D',
+          fontSize: 16,
+          textAlign: 'center',
+          lineHeight: 24,
+        }}>
+          Help others find you nearby
+        </Text>
+      </View>
+
+      <FormField
+        label="City"
+        placeholder="Enter your city"
+        value={city}
+        onChangeText={setCity}
+        autoCapitalize="words"
+        required
+      />
+
+      <View style={{ flex: 1 }} />
+      
+      <TouchableOpacity
+        onPress={nextStep}
+        style={{
+          backgroundColor: '#000000',
+          paddingVertical: 16,
+          borderRadius: 16,
+          alignItems: 'center',
+          marginBottom: 32,
+        }}
+      >
+        <Text style={{
+          color: '#FFFFFF',
+          fontSize: 18,
+          fontWeight: '600',
+        }}>
+          Continue
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderPhotos = () => (
+    <View style={{ flex: 1, paddingHorizontal: 24 }}>
+      <View style={{ alignItems: 'center', marginBottom: 48 }}>
+        <View style={{
+          width: 80,
+          height: 80,
+          backgroundColor: '#000000',
+          borderRadius: 40,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 24,
+        }}>
+          <Logo type="icon" size={40} color="#FFFFFF" />
+        </View>
+        <Text style={{
+          color: '#000000',
+          fontSize: 28,
+          fontWeight: 'bold',
+          textAlign: 'center',
+          marginBottom: 12,
+        }}>
+          Add photos
+        </Text>
+        <Text style={{
+          color: '#6C757D',
+          fontSize: 16,
+          textAlign: 'center',
+          lineHeight: 24,
+        }}>
+          Show others who you are
+        </Text>
+      </View>
+
+      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 32 }}>
+        {[1, 2, 3, 4].map((index) => (
+          <TouchableOpacity
+            key={index}
+            style={{
+              width: (width - 72) / 4,
+              height: (width - 72) / 4,
+              backgroundColor: '#F8F9FA',
+              borderRadius: 16,
+              borderWidth: 2,
+              borderColor: '#E9ECEF',
+              borderStyle: 'dashed',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Logo type="icon" size={24} color="#6C757D" />
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <View style={{ flex: 1 }} />
+      
+      <TouchableOpacity
+        onPress={nextStep}
+        style={{
+          backgroundColor: '#000000',
+          paddingVertical: 16,
+          borderRadius: 16,
+          alignItems: 'center',
+          marginBottom: 32,
+        }}
+      >
+        <Text style={{
+          color: '#FFFFFF',
+          fontSize: 18,
+          fontWeight: '600',
+        }}>
+          Continue
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderBio = () => (
+    <View style={{ flex: 1, paddingHorizontal: 24 }}>
+      <View style={{ alignItems: 'center', marginBottom: 48 }}>
+        <View style={{
+          width: 80,
+          height: 80,
+          backgroundColor: '#000000',
+          borderRadius: 40,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 24,
+        }}>
+          <Logo type="icon" size={40} color="#FFFFFF" />
+        </View>
+        <Text style={{
+          color: '#000000',
+          fontSize: 28,
+          fontWeight: 'bold',
+          textAlign: 'center',
+          marginBottom: 12,
+        }}>
+          Tell us about yourself
+        </Text>
+        <Text style={{
+          color: '#6C757D',
+          fontSize: 16,
+          textAlign: 'center',
+          lineHeight: 24,
+        }}>
+          Help others get to know you better
+        </Text>
+      </View>
+
+      <FormField
+        label="Bio"
+        placeholder="Tell us about yourself, what you're looking for, etc."
+        value={bio}
+        onChangeText={setBio}
+        multiline
+        numberOfLines={6}
+        textAlignVertical="top"
+        required
+      />
+
+      <View style={{ flex: 1 }} />
+      
+      <TouchableOpacity
+        onPress={nextStep}
+        style={{
+          backgroundColor: '#000000',
+          paddingVertical: 16,
+          borderRadius: 16,
+          alignItems: 'center',
+          marginBottom: 32,
+        }}
+      >
+        <Text style={{
+          color: '#FFFFFF',
+          fontSize: 18,
+          fontWeight: '600',
+        }}>
+          Continue
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderIntents = () => (
+    <View style={{ flex: 1, paddingHorizontal: 24 }}>
+      <View style={{ alignItems: 'center', marginBottom: 48 }}>
+        <View style={{
+          width: 80,
+          height: 80,
+          backgroundColor: '#000000',
+          borderRadius: 40,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 24,
+        }}>
+          <Logo type="icon" size={40} color="#FFFFFF" />
+        </View>
+        <Text style={{
+          color: '#000000',
+          fontSize: 28,
+          fontWeight: 'bold',
+          textAlign: 'center',
+          marginBottom: 12,
+        }}>
+          What are you looking for?
+        </Text>
+        <Text style={{
+          color: '#6C757D',
+          fontSize: 16,
+          textAlign: 'center',
+          lineHeight: 24,
+        }}>
+          Select up to 5 intents
+        </Text>
+      </View>
+
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 32 }}>
+        {availableIntents.map((intent) => (
+          <Chip
+            key={intent}
+            label={intent}
+            selected={selectedIntents.includes(intent)}
+            onPress={() => handleIntentToggle(intent)}
+            disabled={selectedIntents.length >= 5 && !selectedIntents.includes(intent)}
+          />
+        ))}
+      </View>
+
+      <View style={{ flex: 1 }} />
+      
+      <TouchableOpacity
+        onPress={nextStep}
+        style={{
+          backgroundColor: '#000000',
+          paddingVertical: 16,
+          borderRadius: 16,
+          alignItems: 'center',
+          marginBottom: 32,
+        }}
+      >
+        <Text style={{
+          color: '#FFFFFF',
+          fontSize: 18,
+          fontWeight: '600',
+        }}>
+          Continue
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderInterests = () => (
+    <View style={{ flex: 1, paddingHorizontal: 24 }}>
+      <View style={{ alignItems: 'center', marginBottom: 48 }}>
+        <View style={{
+          width: 80,
+          height: 80,
+          backgroundColor: '#000000',
+          borderRadius: 40,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 24,
+        }}>
+          <Logo type="icon" size={40} color="#FFFFFF" />
+        </View>
+        <Text style={{
+          color: '#000000',
+          fontSize: 28,
+          fontWeight: 'bold',
+          textAlign: 'center',
+          marginBottom: 12,
+        }}>
+          What are your interests?
+        </Text>
+        <Text style={{
+          color: '#6C757D',
+          fontSize: 16,
+          textAlign: 'center',
+          lineHeight: 24,
+        }}>
+          Select up to 8 interests
+        </Text>
+      </View>
+
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 32 }}>
+        {availableInterests.map((interest) => (
+          <Chip
+            key={interest}
+            label={interest}
+            selected={selectedInterests.includes(interest)}
+            onPress={() => handleInterestToggle(interest)}
+            disabled={selectedInterests.length >= 8 && !selectedInterests.includes(interest)}
+          />
+        ))}
+      </View>
+
+      <View style={{ flex: 1 }} />
+      
+      <TouchableOpacity
+        onPress={nextStep}
+        disabled={loading}
+        style={{
+          backgroundColor: loading ? '#CCCCCC' : '#000000',
+          paddingVertical: 16,
+          borderRadius: 16,
+          alignItems: 'center',
+          marginBottom: 32,
+        }}
+      >
+        <Text style={{
+          color: '#FFFFFF',
+          fontSize: 18,
+          fontWeight: '600',
+        }}>
+          {loading ? 'Creating...' : 'Create Profile'}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderCurrentStep = () => {
+    switch (currentStep) {
+      case 'name':
+        return renderName();
+      case 'birthdate':
+        return renderBirthdate();
+      case 'location':
+        return renderLocation();
+      case 'photos':
+        return renderPhotos();
+      case 'bio':
+        return renderBio();
+      case 'intents':
+        return renderIntents();
+      case 'interests':
+        return renderInterests();
+      default:
+        return renderName();
+    }
+  };
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+      <TopBar 
+        title={`Step ${['name', 'birthdate', 'location', 'photos', 'bio', 'intents', 'interests'].indexOf(currentStep) + 1} of 7`} 
+        showBack={false}
+      />
+      
+      {renderProgressBar()}
+      
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+        {renderCurrentStep()}
       </ScrollView>
     </View>
   );

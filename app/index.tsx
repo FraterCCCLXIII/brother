@@ -1,27 +1,63 @@
-import { useEffect } from 'react';
+import React from 'react';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { Logo } from '../components/Logo';
 
-export default function Index() {
+export default function SplashScreen() {
   const router = useRouter();
 
-  useEffect(() => {
-    // For MVP, we'll start with the auth flow
-    // In a real app, this would check for existing authentication
-    const timer = setTimeout(() => {
-      router.replace('/auth/login');
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [router]);
+  const handleGetStarted = () => {
+    router.push('/auth/login');
+  };
 
   return (
-    <View className="flex-1 bg-bg items-center justify-center">
-      <View className="items-center">
-        <Text className="text-accent text-4xl font-bold mb-4">Brother</Text>
-        <Text className="text-text text-lg mb-8">Making male friendships</Text>
-        <ActivityIndicator size="large" color="#4ADE80" />
+    <View style={{
+      flex: 1,
+      backgroundColor: '#FFFFFF',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 24,
+    }}>
+      {/* App Logo */}
+      <View style={{
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 48,
+      }}>
+        <Logo type="text" size={80} color="#000000" />
       </View>
+
+      {/* Tagline */}
+      <Text style={{
+        color: '#6C757D',
+        fontSize: 20,
+        textAlign: 'center',
+        marginBottom: 64,
+        lineHeight: 28,
+      }}>
+        Build meaningful male friendships
+      </Text>
+
+      {/* Get Started Button */}
+      <TouchableOpacity
+        onPress={handleGetStarted}
+        style={{
+          backgroundColor: '#000000',
+          paddingVertical: 20,
+          paddingHorizontal: 48,
+          borderRadius: 16,
+          alignItems: 'center',
+          minWidth: 200,
+        }}
+      >
+        <Text style={{
+          color: '#FFFFFF',
+          fontSize: 20,
+          fontWeight: '600',
+        }}>
+          Get Started
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }

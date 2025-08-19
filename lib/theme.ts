@@ -1,11 +1,15 @@
 export const theme = {
   colors: {
-    bg: '#0B0B0F',
-    card: '#111216',
-    text: '#F2F2F7',
-    sub: '#A1A1AA',
-    accent: '#4ADE80',
-    danger: '#F87171',
+    bg: '#FFFFFF',
+    card: '#F8F9FA',
+    text: '#000000',
+    sub: '#6C757D',
+    accent: '#000000',
+    danger: '#DC3545',
+    border: '#E9ECEF',
+    input: '#F8F9FA',
+    button: '#000000',
+    buttonText: '#FFFFFF',
   },
   spacing: {
     xs: 4,

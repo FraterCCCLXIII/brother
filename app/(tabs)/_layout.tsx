@@ -5,27 +5,29 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
+        tabBarActiveTintColor: '#007AFF',
+        tabBarInactiveTintColor: '#8E8E93',
         tabBarStyle: {
-          backgroundColor: '#111216',
-          borderTopColor: '#1F2937',
+          backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
+          borderTopColor: '#E5E5EA',
         },
-        tabBarActiveTintColor: '#4ADE80',
-        tabBarInactiveTintColor: '#A1A1AA',
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '500',
+        headerStyle: {
+          backgroundColor: '#FFFFFF',
+        },
+        headerTitleStyle: {
+          fontWeight: '600',
         },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'Discover',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+            <Ionicons name="heart" size={size} color={color} />
           ),
+          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -33,17 +35,19 @@ export default function TabLayout() {
         options={{
           title: 'Matches',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="heart" size={size} color={color} />
+            <Ionicons name="people" size={size} color={color} />
           ),
+          headerShown: false,
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="profile"
         options={{
-          title: 'Settings',
+          title: 'Profile',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings" size={size} color={color} />
+            <Ionicons name="person" size={size} color={color} />
           ),
+          headerShown: false,
         }}
       />
     </Tabs>
