@@ -64,7 +64,7 @@ export const ListItemMatch: React.FC<ListItemMatchProps> = ({ match, onPress }) 
           color: '#6C757D',
           fontSize: 12,
         }}>
-          {new Date(match.timestamp).toLocaleDateString()}
+          {new Date(match.lastMessageAt).toLocaleDateString()}
         </Text>
       </View>
 

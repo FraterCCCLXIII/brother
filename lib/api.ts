@@ -5,6 +5,7 @@ import {
   getDocs,
   addDoc,
   updateDoc,
+  setDoc,
   deleteDoc,
   query,
   where,
@@ -106,7 +107,7 @@ export const swipeApi = {
     const swipeId = `${fromUserId}_${toUserId}`;
     const swipeRef = doc(db, 'swipes', swipeId);
     
-    await updateDoc(swipeRef, {
+    await setDoc(swipeRef, {
       fromUserId,
       toUserId,
       direction,

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { TopBar } from '../../components/TopBar';
-import { api } from '../../lib/api';
+import { chatApi } from '../../lib/api';
 import { Message } from '../../lib/types';
 
 const { height, width } = Dimensions.get('window');
@@ -26,7 +26,7 @@ export default function ChatScreen() {
     
     try {
       setLoading(true);
-      const chatMessages = await api.getMessages(matchId);
+      const chatMessages = await chatApi.getMessages(matchId);
       setMessages(chatMessages);
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -42,8 +42,8 @@ export default function ChatScreen() {
     setInputText('');
 
     try {
-      const success = await api.sendMessage(matchId, 'me', messageText);
-      if (success) {
+      const msgId = await chatApi.sendMessage(matchId, 'me', messageText);
+      if (msgId) {
         // Reload messages to get the updated list
         await loadMessages();
         // Scroll to bottom
@@ -57,7 +57,7 @@ export default function ChatScreen() {
   };
 
   const renderMessage = ({ item }: { item: Message }) => {
-    const isMyMessage = item.senderId === 'me';
+    const isMyMessage = item.from === 'me';
     
     return (
       <View style={{
