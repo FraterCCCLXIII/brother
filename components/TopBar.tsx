@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -18,11 +18,10 @@ export const TopBar: React.FC<TopBarProps> = ({ title, showBack = false, onBack 
     if (onBack) {
       onBack();
     } else {
-      // Check if we can go back, otherwise go to a safe screen
-      if (router.canGoBack()) {
+      // expo-router Router doesn't expose canGoBack; we can still use back()
+      try {
         router.back();
-      } else {
-        // Navigate to a safe default screen
+      } catch (e) {
         router.replace('/(tabs)');
       }
     }
